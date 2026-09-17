@@ -28,7 +28,13 @@ function App() {
   const [selectedTier, setSelectedTier] = useState(null);
   const [paymentMessage, setPaymentMessage] = useState('');
   const [recoveryMode, setRecoveryMode] = useState(() => new URLSearchParams(window.location.hash.replace(/^#/, '')).get('type') === 'recovery');
-  const isAdmin = user?.user_metadata?.role === 'admin'
+  // Admin role must come from app_metadata, which only a server (service role /
+  // Supabase dashboard) can write. user_metadata is client-editable via
+  // supabase.auth.updateUser({ data }), so it must never gate admin access.
+  // This client-side check only hides/shows UI; Supabase RLS on
+  // membership_tiers / subscriptions / wallet_vouchers must independently
+  // enforce the same admin check on every write.
+  const isAdmin = user?.app_metadata?.role === 'admin'
     || user?.email?.toLowerCase() === 'adaud@alfaisalyfc.net';
 
   useEffect(() => {
@@ -118,8 +124,8 @@ function App() {
         </header>
 
         {activeView === 'home' && <Home onMembership={() => navigate('membership')} onSelectTier={chooseTier} />}
-        {activeView === 'membership' && <Membership membership={membership} onSelectTier={chooseTier} />}
-        {activeView === 'wallet' && <Wallet vouchers={vouchers} loyaltyPoints={loyaltyPoints} />}
+        {activeView === 'membership' && <Membership membership={membership} onSelectTier={chooseTier} isDemo={!supabase} />}
+        {activeView === 'wallet' && <Wallet vouchers={vouchers} loyaltyPoints={loyaltyPoints} isDemo={!supabase} />}
         {activeView === 'profile' && <Profile user={user} />}
         {activeView === 'admin' && (isAdmin ? <AdminDashboard /> : <AdminAccessDenied />)}
       </main>
@@ -318,26 +324,30 @@ function Home({ onMembership, onSelectTier }) {
   </div>;
 }
 
-function Membership({ membership, onSelectTier }) {
+function Membership({ membership, onSelectTier, isDemo }) {
   const currentTier = membership?.membership_tiers;
-  const tierName = currentTier?.name ?? 'فيصلاوي بلس';
-  const expiry = membership?.ends_at ?? '2027-05-15';
+  const hasActiveMembership = Boolean(membership);
+  const tierName = currentTier?.name ?? (isDemo ? 'فيصلاوي بلس' : null);
+  const expiry = membership?.ends_at ?? (isDemo ? '2027-05-15' : null);
+  const showBanner = hasActiveMembership || isDemo;
 
-  return <div className="page-wrap"><div className="page-title"><span className="eyebrow">العضوية</span><h1>عضويتك مع الفيصلي</h1><p>اختر المستوى الذي يناسب شغفك، واستمتع بمزايا أكثر.</p></div><div className="membership-banner"><span>الباقة الحالية</span><h2>{tierName}</h2><p>عضوية سنوية · تنتهي في {expiry}</p><button className="primary-button" onClick={() => onSelectTier(tiers.find((tier) => tier.name === tierName) ?? tiers[1])}>إدارة العضوية <ArrowLeft size={18} /></button></div><div className="tier-grid">{tiers.map((tier) => <article className={tier.featured ? 'tier-card featured' : 'tier-card'} key={tier.name}><span className="tier-label">{tier.featured ? 'الأكثر اختيارًا' : 'الباقة'}</span><h3>{tier.name}</h3><strong>{tier.price}<small> ر.س / سنويًا</small></strong><p>قسيمة ترحيبية بقيمة {tier.voucher}</p><p>خصم {tier.discount} على المتجر</p><button className={tier.featured ? 'primary-button' : 'outline-button'} onClick={() => onSelectTier(tier)}>{tier.name === tierName ? 'باقتك الحالية' : 'ترقية الباقة'}</button></article>)}</div></div>;
+  return <div className="page-wrap"><div className="page-title"><span className="eyebrow">العضوية</span><h1>عضويتك مع الفيصلي</h1><p>اختر المستوى الذي يناسب شغفك، واستمتع بمزايا أكثر.</p></div>{showBanner ? <div className="membership-banner"><span>الباقة الحالية</span><h2>{tierName}</h2><p>عضوية سنوية · تنتهي في {expiry}</p><button className="primary-button" onClick={() => onSelectTier(tiers.find((tier) => tier.name === tierName) ?? tiers[1])}>إدارة العضوية <ArrowLeft size={18} /></button></div> : <div className="membership-banner"><span>لا توجد عضوية نشطة</span><h2>لم تشترك بعد في أي باقة</h2><p>اختر إحدى الباقات أدناه لتفعيل عضويتك.</p></div>}<div className="tier-grid">{tiers.map((tier) => <article className={tier.featured ? 'tier-card featured' : 'tier-card'} key={tier.name}><span className="tier-label">{tier.featured ? 'الأكثر اختيارًا' : 'الباقة'}</span><h3>{tier.name}</h3><strong>{tier.price}<small> ر.س / سنويًا</small></strong><p>قسيمة ترحيبية بقيمة {tier.voucher}</p><p>خصم {tier.discount} على المتجر</p><button className={tier.featured ? 'primary-button' : 'outline-button'} onClick={() => onSelectTier(tier)}>{tier.name === tierName ? 'باقتك الحالية' : 'ترقية الباقة'}</button></article>)}</div></div>;
 }
 
 function TierModal({ tier, onClose, onContinue, paymentMessage }) {
   return <div className="tier-modal-backdrop" role="presentation" onClick={(event) => event.target === event.currentTarget && onClose()}><section className="tier-modal" role="dialog" aria-modal="true" aria-labelledby="tier-modal-title"><button className="tier-modal-close" onClick={onClose} aria-label="إغلاق">×</button><span className="eyebrow">تأكيد الباقة</span><h2 id="tier-modal-title">{tier.name}</h2><p>أنت على وشك اختيار هذه العضوية السنوية.</p><div className="tier-modal-details"><div><span>السعر</span><strong>{tier.price} ر.س</strong></div><div><span>قسيمة المتجر</span><strong>{tier.voucher}</strong></div><div><span>الخصم</span><strong>{tier.discount}</strong></div></div>{paymentMessage ? <p className="payment-message">{paymentMessage}</p> : <button className="primary-button modal-continue" onClick={onContinue}>متابعة للدفع <ArrowLeft size={18} /></button>}<small className="modal-note">الدفع التجريبي فقط، ولن يتم خصم أي مبلغ.</small></section></div>;
 }
 
-function Wallet({ vouchers, loyaltyPoints }) {
-  const displayedVouchers = vouchers.length ? vouchers : [
+function Wallet({ vouchers, loyaltyPoints, isDemo }) {
+  const demoVouchers = [
     { title: 'قسيمة الترحيب', value: 200, expires_at: '2027-05-15' },
     { title: 'مكافأة الولاء', value: 30, expires_at: '2026-12-31' },
   ];
+  const displayedVouchers = isDemo && !vouchers.length ? demoVouchers : vouchers;
+  const displayedPoints = isDemo ? (loyaltyPoints || 2480) : loyaltyPoints;
   const balance = displayedVouchers.reduce((total, voucher) => total + Number(voucher.value || 0), 0);
 
-  return <div className="page-wrap"><div className="page-title"><span className="eyebrow">المحفظة</span><h1>قسائمك ومكافآتك</h1><p>رصيد الولاء: {loyaltyPoints || 2480} نقطة</p></div><div className="wallet-balance"><span>إجمالي الرصيد المتاح</span><strong>{balance} <small>ر.س</small></strong><p>قسائمك محمية ومخصصة لحسابك</p></div>{displayedVouchers.map((voucher) => <div className="voucher" key={voucher.code ?? voucher.title}><WalletCards /><div><strong>{voucher.title}</strong><small>صالحة حتى {voucher.expires_at}</small></div><b>{voucher.value} ر.س</b></div>)}</div>;
+  return <div className="page-wrap"><div className="page-title"><span className="eyebrow">المحفظة</span><h1>قسائمك ومكافآتك</h1><p>رصيد الولاء: {displayedPoints} نقطة</p></div><div className="wallet-balance"><span>إجمالي الرصيد المتاح</span><strong>{balance} <small>ر.س</small></strong><p>قسائمك محمية ومخصصة لحسابك</p></div>{displayedVouchers.length ? displayedVouchers.map((voucher) => <div className="voucher" key={voucher.code ?? voucher.title}><WalletCards /><div><strong>{voucher.title}</strong><small>صالحة حتى {voucher.expires_at}</small></div><b>{voucher.value} ر.س</b></div>) : <p className="admin-empty">لا توجد قسائم متاحة حاليًا.</p>}</div>;
 }
 
 export default App;
