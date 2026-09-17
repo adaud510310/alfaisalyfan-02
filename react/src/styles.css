@@ -31,6 +31,7 @@
 .sponsors-image{display:block;max-width:65%;height:auto;border-radius:14px}
 .faisaly-footer{margin-top:40px;padding:50px 40px 20px;background:#111;color:#ddd;border-top:5px solid #890101;box-shadow:0 -4px 15px rgba(0,0,0,.2);direction:rtl}
 .faisaly-footer-content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;max-width:1200px;margin:0 auto}.faisaly-footer-col:last-child{display:none}
+.faisaly-footer a[href="#quran"]{display:none}
 .faisaly-footer-col h3{margin:0 0 20px;padding-bottom:10px;color:#ffd700;font-size:18px;font-weight:700;text-align:right;position:relative}
 .faisaly-footer-col h3::after{content:'';position:absolute;right:0;bottom:0;width:40px;height:3px;background:#890101}
 .faisaly-footer-col p,.faisaly-footer-col li,.faisaly-footer-col a{color:#aaa;font-size:13.5px;line-height:1.9;text-decoration:none}
