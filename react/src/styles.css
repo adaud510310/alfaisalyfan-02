@@ -105,8 +105,8 @@
 	.landing-brand{width:100%}
 	.landing-actions{display:flex;flex-direction:column;align-items:stretch;width:100%;gap:10px}
 	.quick-links-bar{display:flex;flex-direction:column;width:100%;max-height:46px;overflow:hidden;margin:0;padding:7px;gap:6px;transition:max-height .25s ease}
-	.quick-links-bar::before{content:'الروابط السريعة  ⌄';display:flex;align-items:center;justify-content:center;min-height:30px;color:var(--burgundy);font-size:13px;font-weight:700}
-	.quick-links-bar:hover,.quick-links-bar:focus-within{max-height:190px}
+	.quick-links-bar::before{content:'☰';display:flex;align-items:center;justify-content:center;min-height:30px;color:var(--burgundy);font-size:25px;font-weight:700;line-height:1;cursor:pointer}
+	.quick-links-bar:hover,.quick-links-bar:focus-within,.quick-links-bar:active{max-height:190px}
 	.quick-link-item{min-width:0;width:100%;height:36px;padding-inline:8px}
 	.landing-actions>button{width:100%;min-height:46px}
 	.landing-main{width:100%;min-width:0}
