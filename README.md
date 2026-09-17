@@ -1,12 +1,14 @@
 # فيصلاوي | Al-Faisaly Fan Membership
 
-واجهة MVP عربية RTL لبرنامج عضوية ومكافآت مشجعي نادي الفيصلي. افتح `index.html` مباشرة، أو شغّل خادمًا محليًا:
+واجهة MVP عربية RTL لبرنامج عضوية ومكافآت مشجعي نادي الفيصلي. شغّل تطبيق React من مجلد `react`:
 
 ```powershell
-python -m http.server 4173
+cd react
+npm install
+npm run dev
 ```
 
-ثم افتح `http://localhost:4173`.
+ثم افتح الرابط الذي يعرضه Vite، غالبًا `http://localhost:5173`.
 
 ## ما تم تنفيذه
 

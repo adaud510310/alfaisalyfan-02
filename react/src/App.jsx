@@ -36,6 +36,8 @@ function App() {
   // enforce the same admin check on every write.
   const isAdmin = user?.app_metadata?.role === 'admin'
     || user?.email?.toLowerCase() === 'adaud@alfaisalyfc.net';
+  const [authScreen, setAuthScreen] = useState('landing');
+  const [authMode, setAuthMode] = useState('login');
 
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
@@ -87,7 +89,16 @@ function App() {
 
   if (recoveryMode) return <ResetPasswordPage />;
 
-  if (supabase && authReady && !user) return <AuthPage initialMessage={authIssue} />;
+  if (authReady && !user) {
+    if (authScreen === 'auth') {
+      return <AuthPage initialMessage={authIssue} defaultMode={authMode} onBack={() => setAuthScreen('landing')} />;
+    }
+
+    return <PublicLandingPage onOpenAuth={(mode) => {
+      setAuthMode(mode);
+      setAuthScreen('auth');
+    }} />;
+  }
 
   const navigate = (view) => {
     setActiveView(view);
@@ -101,10 +112,14 @@ function App() {
 
   const closeTierModal = () => setSelectedTier(null);
 
+  const logout = async () => {
+    await supabase.auth.signOut();
+  };
+
   return (
     <div className="app-shell">
       <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
-        <div className="brand"><span className="brand-mark">ف</span><div><strong>فيصلاوي</strong><small>عضوية النادي الرسمية</small></div></div>
+        <div className="brand"><span className="brand-mark brand-logo-wrap"><img src="/images/club-logo.svg" alt="شعار النادي" className="brand-logo" /></span><div><small>عضوية النادي الرسمية</small></div></div>
         <div className="club-stamp"><span>AL FAISALY</span><b>FC</b><small>EST. 1954</small></div>
         <nav>
           {navItems.map(({ id, label, icon: Icon }) => (
@@ -113,13 +128,14 @@ function App() {
             </button>
           ))}
           {isAdmin && <button className={activeView === 'admin' ? 'nav-item active' : 'nav-item'} onClick={() => navigate('admin')}><ShieldCheck size={18} /><span>لوحة الإدارة</span></button>}
+          <button className="nav-item sidebar-logout" onClick={logout}><LogOut size={18} /><span>تسجيل الخروج</span></button>
         </nav>
       </aside>
 
       <main className="content">
         <header className="topbar">
           <button className="mobile-menu" onClick={() => setMenuOpen(!menuOpen)} aria-label="فتح القائمة"><Menu /></button>
-          <div className="breadcrumb"><button onClick={() => navigate('home')}>الرئيسية</button><span>/</span><b>{activeView === 'home' ? 'الرئيسية' : activeView === 'admin' ? 'لوحة الإدارة' : navItems.find((item) => item.id === activeView)?.label}</b></div>
+          <div className="breadcrumb"><button className="home-return" onClick={() => navigate('home')}><House size={16} />الرئيسية</button>{activeView !== 'home' && <><span>/</span><b>{activeView === 'admin' ? 'لوحة الإدارة' : navItems.find((item) => item.id === activeView)?.label}</b></>}</div>
           <div className="profile"><span className="avatar">{(user?.user_metadata?.full_name || user?.email || 'م').charAt(0).toUpperCase()}</span><div><strong>{user?.user_metadata?.full_name || 'عضو فيصلاوي'}</strong><small>{user?.email}</small></div></div>
         </header>
 
@@ -134,8 +150,18 @@ function App() {
   );
 }
 
-function AuthPage({ initialMessage = '' }) {
-  const [mode, setMode] = useState('login');
+function PublicLandingPage({ onOpenAuth }) {
+  const quickLinks = [
+    { label: 'الموقع', href: 'https://alfaisalyfc.net/', icon: '🌐' },
+    { label: 'المتجر', href: 'https://store.alfaisalyfc.net/', icon: '🛍️' },
+    { label: 'تذاكر', href: 'https://webook.com/ar/search?q=الفيصلي', icon: '🎫' },
+  ];
+
+  return <div className="public-shell"><div style={{ maxWidth: 1180, margin: '0 auto', padding: '0 5%' }}><header className="landing-header"><div className="landing-brand"><span className="brand-mark brand-logo-wrap"><img src="/images/club-logo.svg" alt="شعار النادي" className="brand-logo" /></span><div><small>عضوية النادي الرسمية</small></div></div><div className="landing-actions"><div className="quick-links-bar">{quickLinks.map((link) => <a key={link.label} href={link.href} target="_blank" rel="noreferrer" className="quick-link-item"><span>{link.icon}</span><span>{link.label}</span></a>)} </div><button className="ghost-button" onClick={() => onOpenAuth('login')}>تسجيل الدخول</button><button className="primary-button" onClick={() => onOpenAuth('signup')}>إنشاء حساب</button></div></header><main className="landing-main"><section className="hero"><div><span className="eyebrow light">عضوية الفيصلي الرسمية</span><h1>كن جزءًا من<br /><strong>قصة الفيصلي</strong></h1><p>عضويتك تقرّبك من النادي، تمنحك صوتًا، وتكافئ انتماءك في كل لحظة.</p><div className="hero-actions"><button className="primary-button" onClick={() => onOpenAuth('signup')}>اكتشف العضويات <ArrowLeft size={18} /></button><button className="secondary-button" onClick={() => onOpenAuth('login')}>دخول حساب موجود</button></div></div><div className="hero-crest"><span>AL FAISALY</span><b>FC</b><small>EST. 1954</small></div></section><div className="landing-stats"><div><strong>2.4k+</strong><span>أعضاء نشطين</span></div><div><strong>18</strong><span>مزايا حصرية</span></div><div><strong>24/7</strong><span>خدمة الأعضاء</span></div></div><section className="steps-section"><div className="section-heading"><div><span className="eyebrow">كيف تبدأ</span><h2>رحلة العضوية السريعة</h2></div></div><div className="steps-grid"><article className="step-card"><span>1</span><h3>أنشئ حسابك</h3><p>سجل بياناتك في دقائق فقط.</p></article><article className="step-card"><span>2</span><h3>اختر عضويتك</h3><p>اختَر الباقة المناسبة لشغفك.</p></article><article className="step-card"><span>3</span><h3>استمتع بالمزايا</h3><p>احصل على الخصومات، القسائم، وتذاكرك المفضلة.</p></article></div></section><section className="landing-cta"><div><span className="eyebrow">أعِد اكتشاف ناديك</span><h2>انضم إلى عائلة فيصلاوي اليوم.</h2></div><button className="primary-button" onClick={() => onOpenAuth('signup')}>ابدأ عضويتك <ArrowLeft size={18} /></button></section><section className="faisaly-sponsors"><h3 className="sponsors-title">شركاء النجاح والرعاية</h3><div className="sponsors-container"><img src="/images/002.png" alt="رعاة نادي الفيصلي السعودي" className="sponsors-image" /></div></section><footer className="faisaly-footer"><div className="faisaly-footer-content"><div className="faisaly-footer-col"><h3>عن نادي الفيصلي السعودي</h3><p>تأسس نادي الفيصلي السعودي (العنابي) عام 1954م في مدينة حرمة بمحافظة المجمعة. يُعد النادي رمزاً رياضياً وثقافياً واجتماعياً بارزاً في المملكة العربية السعودية.</p><div className="faisaly-social-icons"><a href="https://x.com/alfaisaly" target="_blank" rel="noreferrer" className="faisaly-social-icon x-link"><i className="fa-brands fa-x-twitter"></i></a><a href="https://www.instagram.com/alfaisalyfc/" target="_blank" rel="noreferrer" className="faisaly-social-icon instagram-link"><i className="fa-brands fa-instagram"></i></a><a href="https://www.facebook.com/alfaisaly1954" target="_blank" rel="noreferrer" className="faisaly-social-icon facebook-link"><i className="fa-brands fa-facebook-f"></i></a><a href="https://www.youtube.com/@alfaisalyfc1" target="_blank" rel="noreferrer" className="faisaly-social-icon youtube-link"><i className="fa-brands fa-youtube"></i></a></div></div><div className="faisaly-footer-col"><h3>روابط سريعة</h3><ul className="faisaly-footer-links"><li><a href="https://alfaisalyfc.net/" target="_blank" rel="noreferrer"><i className="fa-solid fa-arrow-left"></i> الموقع الرسمي للنادي</a></li><li><a href="https://ar.wikipedia.org/wiki/%D8%A7%D9%84%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D9%81%D9%8A%D8%B5%D9%84%D9%8A_(%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A%D8%A9)" target="_blank" rel="noreferrer"><i className="fa-solid fa-arrow-left"></i> صفحة النادي على ويكيبيديا</a></li><li><a href="#quran"><i className="fa-solid fa-arrow-left"></i> بداية السورة</a></li></ul></div><div className="faisaly-footer-col"><h3>فضل قراءة سورة الكهف</h3><p>عن أبي سعيد الخدري رضي الله عنه أن النبي صلى الله عليه وسلم قال: «من قرأ سورة الكهف في يوم الجمعة أضاء له من النور ما بين الجمعتين» (رواه الحاكم).</p></div></div><div className="faisaly-footer-bottom">جميع الحقوق محفوظة &copy; 2026 | تحت إشراف محبي <a href="https://alfaisalyfc.net/" target="_blank" rel="noreferrer">نادي الفيصلي السعودي (العنابي)</a></div></footer></main></div></div>;
+}
+
+function AuthPage({ initialMessage = '', defaultMode = 'login', onBack }) {
+  const [mode, setMode] = useState(defaultMode);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [status, setStatus] = useState({ type: initialMessage ? 'error' : '', message: initialMessage });
   const [loading, setLoading] = useState(false);
@@ -192,7 +218,8 @@ function AuthPage({ initialMessage = '' }) {
 
   return <main className="auth-page">
     <section className="auth-panel">
-      <div className="auth-brand"><span className="brand-mark">ف</span><div><strong>فيصلاوي</strong><small>عضوية النادي الرسمية</small></div></div>
+      {onBack && <button className="ghost-button" onClick={onBack} style={{ width: 'fit-content', marginBottom: 20 }}>العودة إلى الصفحة الرئيسية</button>}
+      <div className="auth-brand"><span className="brand-mark brand-logo-wrap"><img src="/images/club-logo.svg" alt="شعار النادي" className="brand-logo" /></span><div><small>عضوية النادي الرسمية</small></div></div>
       <div className="auth-heading"><span className="eyebrow">مرحبًا بك في عائلة الفيصلي</span><h1>{mode === 'signup' ? 'أنشئ عضويتك' : 'تسجيل الدخول'}</h1><p>{mode === 'signup' ? 'ابدأ رحلتك مع النادي واستمتع بمزايا عضويتك.' : 'أدخل بياناتك للوصول إلى عضويتك ومكافآتك.'}</p></div>
       <form className="auth-form" onSubmit={submit}>
         {mode === 'signup' && <label>الاسم الكامل<input name="name" value={form.name} onChange={updateField} placeholder="محمد العتيبي" required /></label>}
