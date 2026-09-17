@@ -218,7 +218,7 @@ function AuthPage({ initialMessage = '', defaultMode = 'login', onBack }) {
 
   return <main className="auth-page">
     <section className="auth-panel">
-      {onBack && <button className="ghost-button" onClick={onBack} style={{ width: 'fit-content', marginBottom: 20 }}>العودة إلى الصفحة الرئيسية</button>}
+      {onBack && <button className="auth-home-button" type="button" onClick={onBack}><House size={17} />العودة إلى الصفحة الرئيسية</button>}
       <div className="auth-brand"><span className="brand-mark brand-logo-wrap"><img src="/images/club-logo.svg" alt="شعار النادي" className="brand-logo" /></span><div><small>عضوية النادي الرسمية</small></div></div>
       <div className="auth-heading"><span className="eyebrow">مرحبًا بك في عائلة الفيصلي</span><h1>{mode === 'signup' ? 'أنشئ عضويتك' : 'تسجيل الدخول'}</h1><p>{mode === 'signup' ? 'ابدأ رحلتك مع النادي واستمتع بمزايا عضويتك.' : 'أدخل بياناتك للوصول إلى عضويتك ومكافآتك.'}</p></div>
       <form className="auth-form" onSubmit={submit}>
