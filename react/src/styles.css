@@ -30,7 +30,7 @@
 .sponsors-container{display:flex;justify-content:center;align-items:center;min-height:140px}
 .sponsors-image{display:block;max-width:65%;height:auto;border-radius:14px}
 .faisaly-footer{margin-top:40px;padding:50px 40px 20px;background:#111;color:#ddd;border-top:5px solid #890101;box-shadow:0 -4px 15px rgba(0,0,0,.2);direction:rtl}
-.faisaly-footer-content{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px;max-width:1200px;margin:0 auto}
+.faisaly-footer-content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;max-width:1200px;margin:0 auto}.faisaly-footer-col:last-child{display:none}
 .faisaly-footer-col h3{margin:0 0 20px;padding-bottom:10px;color:#ffd700;font-size:18px;font-weight:700;text-align:right;position:relative}
 .faisaly-footer-col h3::after{content:'';position:absolute;right:0;bottom:0;width:40px;height:3px;background:#890101}
 .faisaly-footer-col p,.faisaly-footer-col li,.faisaly-footer-col a{color:#aaa;font-size:13.5px;line-height:1.9;text-decoration:none}
@@ -106,10 +106,10 @@
 	.landing-actions{display:flex;flex-direction:column;align-items:stretch;width:100%;gap:10px}
 	.quick-links-bar{display:flex;flex-direction:column;width:100%;max-height:46px;overflow:hidden;margin:0;padding:7px;gap:6px;transition:max-height .25s ease}
 	.quick-links-bar::before{content:'☰';display:flex;align-items:center;justify-content:center;min-height:30px;color:var(--burgundy);font-size:25px;font-weight:700;line-height:1;cursor:pointer}
-	.quick-links-bar:hover,.quick-links-bar:focus-within,.quick-links-bar:active{max-height:190px}
+	.quick-links-bar:hover,.quick-links-bar:focus-within,.quick-links-bar:active,.landing-actions.menu-open .quick-links-bar{max-height:190px}
 	.quick-link-item{min-width:0;width:100%;height:36px;padding-inline:8px}
 	.landing-actions>button{display:none;width:100%;min-height:46px}
-	.landing-actions:has(.quick-links-bar:hover)>button,.landing-actions:has(.quick-links-bar:focus-within)>button,.landing-actions:has(.quick-links-bar:active)>button{display:inline-flex;justify-content:center}
+	.landing-actions:has(.quick-links-bar:hover)>button,.landing-actions:has(.quick-links-bar:focus-within)>button,.landing-actions:has(.quick-links-bar:active)>button,.landing-actions.menu-open>button{display:inline-flex;justify-content:center}
 	.landing-main{width:100%;min-width:0}
 	.hero{width:100%;min-width:0}
 }
