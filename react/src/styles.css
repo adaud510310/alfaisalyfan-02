@@ -51,7 +51,7 @@
 .x-link i,.instagram-link i,.facebook-link i,.youtube-link i{display:none}
 .faisaly-footer-bottom{max-width:1200px;margin:40px auto 0;padding-top:20px;border-top:1px solid #ede7e7;text-align:center;color:#777;font-size:12px}
 .faisaly-footer-bottom a{color:#ffd700;text-decoration:none}
-@media(max-width:700px){.faisaly-footer-content{grid-template-columns:1fr}.sponsors-title{font-size:22px}.sponsors-title::before{font-size:22px}.faisaly-footer{padding:40px 20px 20px}}
+@media(max-width:700px){.faisaly-footer-content{grid-template-columns:1fr}.sponsors-title{font-size:0}.sponsors-title::before{font-size:22px}.faisaly-footer{padding:40px 20px 20px}}
 .ghost-button:hover{border-color:var(--burgundy);color:var(--burgundy)}
 .secondary-button{display:inline-flex;align-items:center;gap:10px;background:transparent;color:#fff;padding:13px 19px;margin-top:18px;border:1px solid #ffffff66}
 .secondary-button:hover{border-color:#fff}
