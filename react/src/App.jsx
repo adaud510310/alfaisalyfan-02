@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
 import { ArrowLeft, BadgePercent, CircleDollarSign, House, LogOut, Menu, ShieldCheck, TicketCheck, UserRound, WalletCards } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { getLoyaltyPoints, getMembershipForUser, getWalletVouchers } from './lib/membership';
@@ -156,6 +157,22 @@ function PublicLandingPage({ onOpenAuth }) {
     { label: 'المتجر', href: 'https://store.alfaisalyfc.net/', icon: '🛍️' },
     { label: 'تذاكر', href: 'https://webook.com/ar/search?q=الفيصلي', icon: '🎫' },
   ];
+
+  const publicTierCards = <section className="public-tiers"><div className="section-heading"><div><span className="eyebrow">اختر مستوى انتمائك</span><h2>أسعار العضويات</h2></div><span>ثلاث باقات. شغف واحد.</span></div><div className="tier-grid">{tiers.map((tier) => <article className={tier.featured ? 'tier-card featured' : 'tier-card'} key={tier.name}><span className="tier-label">{tier.featured ? 'الأفضل قيمة' : 'عضوية سنوية'}</span><h3>{tier.name}</h3><strong>{tier.price}<small> ر.س</small></strong><p>قسيمة متجر بقيمة {tier.voucher}</p><p>خصم {tier.discount} على المتجر</p><button className="outline-button" onClick={() => onOpenAuth('signup')}>ابدأ عضويتك <ArrowLeft size={16} /></button></article>)}</div></section>;
+
+  useEffect(() => {
+    const stats = document.querySelector('.landing-stats');
+    if (!stats) return undefined;
+    const mount = document.createElement('div');
+    mount.className = 'public-tier-mount';
+    stats.parentNode.insertBefore(mount, stats);
+    const root = createRoot(mount);
+    root.render(publicTierCards);
+    return () => {
+      root.unmount();
+      mount.remove();
+    };
+  }, []);
 
   useEffect(() => {
     const quickLinksBar = document.querySelector('.landing-actions .quick-links-bar');
